@@ -1,0 +1,80 @@
+---
+- name: Update APT packages
+  apt:
+    update_cache: yes
+
+- name: Install Java JDK
+  apt:
+    name: default-jdk
+    state: present
+
+- name: Create tomcat group
+  group:
+    name: tomcat
+    state: present
+
+- name: Create tomcat user
+  user:
+    name: tomcat
+    group: tomcat
+    home: /opt/tomcat
+    shell: /bin/false
+    create_home: no
+
+- name: Download Tomcat
+  get_url:
+    url: https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.31/bin/apache-tomcat-8.5.31.tar.gz
+    dest: /tmp/apache-tomcat-8.5.31.tar.gz
+
+- name: Create Tomcat directory
+  file:
+    path: /opt/tomcat
+    state: directory
+    owner: root
+    group: root
+
+- name: Extract Tomcat archive
+  unarchive:
+    src: /tmp/apache-tomcat-8.5.31.tar.gz
+    dest: /opt/tomcat
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+
+- name: Set group ownership
+  file:
+    path: /opt/tomcat
+    group: tomcat
+    recurse: yes
+
+- name: Set permissions for conf directory
+  file:
+    path: /opt/tomcat/conf
+    mode: "g+rx"
+    recurse: yes
+
+- name: Change ownership of tomcat folders
+  file:
+    path: "{{ item }}"
+    owner: tomcat
+    group: tomcat
+    recurse: yes
+  loop:
+    - /opt/tomcat/webapps
+    - /opt/tomcat/work
+    - /opt/tomcat/temp
+    - /opt/tomcat/logs
+
+- name: Copy Tomcat systemd service file
+  template:
+    src: tomcat.service.j2
+    dest: /etc/systemd/system/tomcat.service
+    mode: '0644'
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Start and enable Tomcat
+  systemd:
+    name: tomcat
+    state: started
+    enabled: yes

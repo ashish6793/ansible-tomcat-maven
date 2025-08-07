@@ -1,0 +1,33 @@
+---
+- name: Install Java JDK (dependency)
+  apt:
+    name: default-jdk
+    state: present
+
+- name: Download Maven
+  get_url:
+    url: https://archive.apache.org/dist/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+    dest: /tmp/apache-maven-3.3.9-bin.tar.gz
+
+- name: Extract Maven
+  unarchive:
+    src: /tmp/apache-maven-3.3.9-bin.tar.gz
+    dest: /opt/
+    remote_src: yes
+
+- name: Add Maven to PATH
+  lineinfile:
+    path: /etc/profile.d/maven.sh
+    line: 'export PATH=$PATH:/opt/apache-maven-3.3.9/bin'
+    create: yes
+    state: present
+    mode: '0755'
+
+- name: Apply environment variable
+  shell: source /etc/profile.d/maven.sh
+  ignore_errors: yes
+
+- name: Set Maven alternative
+  command: update-alternatives --install /usr/bin/mvn maven /opt/apache-maven-3.3.9/bin/mvn 1001
+  args:
+    creates: /usr/bin/mvn

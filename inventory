@@ -1,0 +1,2 @@
+[all]
+worker02 ansible_host=10.128.0.5
