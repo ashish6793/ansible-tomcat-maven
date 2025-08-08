@@ -1,2 +1,2 @@
 [all]
-worker02 ansible_host=10.128.0.5
+worker02 ansible_host=10.128.0.6
