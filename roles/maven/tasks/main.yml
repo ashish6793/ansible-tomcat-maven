@@ -24,7 +24,7 @@
     mode: '0755'
 
 - name: Apply environment variable
-  shell: source /etc/profile.d/maven.sh
+  shell: . /etc/profile.d/maven.sh
   ignore_errors: yes
 
 - name: Set Maven alternative
